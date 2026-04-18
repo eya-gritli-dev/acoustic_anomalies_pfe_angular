@@ -1,0 +1,181 @@
+/* ── KPI row ──────────────────────────────────────────────────────────── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 cartes */
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1200px) {
+  .kpi-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kpi-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 22px;
+  border: 1px solid #e8ecf4;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s;
+}
+
+.kpi-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.kpi-card .kpi-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+.kpi-card .kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+}
+
+.kpi-card .kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.kpi-card .kpi-sub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.kpi-card.success .kpi-icon { background: #f0fdf4; }
+.kpi-card.success .kpi-value { color: #16a34a; }
+.kpi-card.danger  .kpi-icon { background: #fef2f2; }
+.kpi-card.danger  .kpi-value { color: #dc2626; }
+.kpi-card.info    .kpi-icon { background: #eff6ff; }
+.kpi-card.info    .kpi-value { color: #1a56db; }
+.kpi-card.warning .kpi-icon { background: #fffbeb; }
+.kpi-card.warning .kpi-value { color: #d97706; }
+
+/* ── Charts row ───────────────────────────────────────────────────────── */
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .charts-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 22px;
+  border: 1px solid #e8ecf4;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  min-width: 0; /* fix overflow dans grid */
+}
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Bar chart ────────────────────────────────────────────────────────── */
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 🔥 FIX PRINCIPAL : layout flex au lieu de grid fixe */
+.bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  cursor: default;
+}
+
+/* Ligne label + count sur la même ligne */
+.bar-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.bar-label {
+  font-size: 11px;
+  color: #475569;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.bar-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+  height: 7px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 4px;
+}
+
+.no-data {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: center;
+  padding: 16px 0;
+}

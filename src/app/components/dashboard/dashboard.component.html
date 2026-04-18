@@ -1,0 +1,126 @@
+<div class="dashboard" *ngIf="stats as s">
+
+  <!-- ── KPI cards ─────────────────────────────────────────────────── -->
+  <div class="kpi-row">
+
+    <div class="kpi-card info">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-label">Produits testés</div>
+      <div class="kpi-value">{{ s.total_products ?? 0 }}</div>
+      <div class="kpi-sub">total de ce run</div>
+    </div>
+
+    <div class="kpi-card success">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-label">Passés</div>
+      <div class="kpi-value">{{ s.total_passed ?? 0 }}</div>
+      <div class="kpi-sub">{{ s.pass_rate ?? 0 }}% pass rate</div>
+    </div>
+
+    <div class="kpi-card danger">
+      <div class="kpi-icon">⚠️</div>
+      <div class="kpi-label">Échoués</div>
+      <div class="kpi-value">{{ s.total_failed ?? 0 }}</div>
+      <div class="kpi-sub">anomalies détectées</div>
+    </div>
+
+    <div class="kpi-card" [style.border-left]="'4px solid ' + passRateColor">
+      <div class="kpi-icon">🎯</div>
+      <div class="kpi-label">Taux de passage</div>
+      <div class="kpi-value" [style.color]="passRateColor">
+        {{ s.pass_rate ?? 0 }}%
+      </div>
+      <div class="kpi-sub">objectif : 95%</div>
+    </div>
+
+    <div class="kpi-card warning">
+      <div class="kpi-icon">🔶</div>
+      <div class="kpi-label">À risque</div>
+      <div class="kpi-value">{{ totalAtRisk }}</div>
+      <div class="kpi-sub">proche limite</div>
+    </div>
+
+  </div>
+
+  <!-- ── Charts ────────────────────────────────────────────────────── -->
+  <div class="charts-row">
+
+    <!-- ── Types d'anomalie -->
+    <div class="chart-card">
+      <div class="chart-title">Types d'anomalie</div>
+
+      <div class="bars" *ngIf="anomalyBars.length; else noAnomaly">
+        <div class="bar-row" *ngFor="let b of anomalyBars" [title]="b.description">
+          <div class="bar-meta">
+            <span class="bar-label">{{ b.label }}</span>
+            <span class="bar-count">{{ b.count }} ({{ b.pct }}%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill"
+                 [style.width.%]="b.pct"
+                 [style.background]="b.color">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noAnomaly>
+        <div class="no-data">Aucune anomalie détectée</div>
+      </ng-template>
+    </div>
+
+    <!-- ── Par haut-parleur -->
+    <div class="chart-card">
+      <div class="chart-title">Par haut-parleur</div>
+
+      <div class="bars" *ngIf="speakerBars.length; else noSpeaker">
+        <div class="bar-row" *ngFor="let b of speakerBars">
+          <div class="bar-meta">
+            <span class="bar-label">{{ b.label }}</span>
+            <span class="bar-count">{{ b.count }} ({{ b.pct }}%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill"
+                 [style.width.%]="b.pct"
+                 [style.background]="b.color">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noSpeaker>
+        <div class="no-data">Aucune donnée</div>
+      </ng-template>
+    </div>
+
+    <!-- ── Par type de test -->
+    <div class="chart-card">
+      <div class="chart-title">Par type de test</div>
+
+      <div class="bars" *ngIf="testBars.length; else noTest">
+        <div class="bar-row" *ngFor="let b of testBars">
+          <div class="bar-meta">
+            <span class="bar-label">{{ b.label }}</span>
+            <span class="bar-count">{{ b.count }} ({{ b.pct }}%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill"
+                 [style.width.%]="b.pct"
+                 [style.background]="b.color">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noTest>
+        <div class="no-data">Aucune donnée</div>
+      </ng-template>
+    </div>
+
+  </div>
+
+</div>
+
+<div *ngIf="!stats" class="no-data">
+  Aucun résultat disponible. Lance une prédiction.
+</div>

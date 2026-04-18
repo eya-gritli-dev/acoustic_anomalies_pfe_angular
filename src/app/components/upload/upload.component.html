@@ -1,0 +1,78 @@
+<div class="upload-card">
+
+  <h2 class="section-title">
+    <span class="stitle-icon">
+      <svg viewBox="0 0 16 16" fill="currentColor">
+        <path d="M2 3a1 1 0 011-1h5.586a1 1 0 01.707.293l3.414 3.414A1 1 0 0113 6.414V13a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm8 0v3h3L10 3z"/>
+      </svg>
+    </span>
+    Upload des fichiers
+  </h2>
+
+  <!-- Drop zone -->
+  <div
+    class="drop-zone"
+    [class.drag-over]="isDragOver"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)"
+  >
+    <div class="dz-icon">
+      <svg viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 1a.5.5 0 01.5.5v9.793l2.146-2.147a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 01.708-.708L7.5 11.293V1.5A.5.5 0 018 1z"/>
+        <path d="M2 13.5a.5.5 0 01.5-.5h11a.5.5 0 010 1h-11a.5.5 0 01-.5-.5z"/>
+      </svg>
+    </div>
+    <p class="dz-title">Glissez vos fichiers <strong>.txt</strong></p>
+    <p class="dz-sub">ou sélectionnez un dossier</p>
+    <label class="btn-browse">
+      Parcourir
+      <input
+        type="file"
+        webkitdirectory
+        multiple
+        (change)="onFileSelected($event)"
+      />
+    </label>
+    <div class="fmt-row">
+      <span class="fmt">THD</span>
+      <span class="fmt">Rub+Buzz</span>
+      <span class="fmt">Freq. Response</span>
+    </div>
+  </div>
+
+  <!-- Liste fichiers -->
+  <div class="file-list" *ngIf="selectedFiles.length">
+    <div class="file-count">{{ selectedFiles.length }} fichier(s) sélectionné(s)</div>
+    <ul>
+      <li *ngFor="let f of selectedFiles">
+        <span class="file-icon">
+          <svg viewBox="0 0 16 16" fill="currentColor" width="11" height="11">
+            <path d="M2 3a1 1 0 011-1h5.586a1 1 0 01.707.293l3.414 3.414A1 1 0 0113 6.414V13a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm8 0v3h3L10 3z"/>
+          </svg>
+        </span>
+        <span class="file-name">{{ f.name }}</span>
+        <span class="file-size">({{ (f.size / 1024).toFixed(1) }} Ko)</span>
+      </li>
+    </ul>
+    <button class="btn-clear" (click)="clearFiles()">✕ Effacer</button>
+  </div>
+
+  <!-- Erreur -->
+  <div class="error-msg" *ngIf="errorMessage">
+    ⚠ {{ errorMessage }}
+  </div>
+
+
+
+  <!-- Bouton prédiction -->
+  <button
+    class="btn-predict"
+    [disabled]="!selectedFiles.length || isLoading"
+    (click)="runPrediction()"
+  >
+    <span *ngIf="!isLoading">🔍 Lancer la prédiction</span>
+    <span *ngIf="isLoading" class="spinner">⏳ Analyse en cours...</span>
+  </button>
+
+</div>

@@ -1,0 +1,129 @@
+<!-- ── Header ─────────────────────────────────────────────────────────── -->
+<header class="app-header">
+  <div class="header-left">
+    <div class="logo-block">
+  <div class="logo">
+    <img 
+  src="https://logos-world.net/wp-content/uploads/2023/02/Sagemcom-Logo.png" 
+  alt="Logo Sagemcom"
+  class="logo-img"
+/>
+  </div>      <span class="logo-fallback" style="display:none">SAGEMCOM</span>
+    </div>
+    <div class="divider"></div>
+    <div class="title-block">
+      <h1 class="app-title">Détection des anomalies acoustiques</h1>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="api-badge"
+         [class.online]="apiOnline"
+         [class.offline]="apiChecked && !apiOnline">
+      <span class="dot"></span>
+      <span class="badge-label">
+        {{ apiOnline ? 'API connectée' : apiChecked ? 'API hors ligne' : 'Vérification...' }}
+      </span>
+    </div>
+    <button class="btn-reset" *ngIf="result" (click)="reset()">
+      ↺ Nouvelle analyse
+    </button>
+  </div>
+</header>
+
+<!-- ── Body ──────────────────────────────────────────────────────────── -->
+<main class="app-body">
+
+  <!-- Sidebar upload -->
+  <aside class="sidebar">
+    <app-upload (resultReady)="onResultReady($event)" />
+  </aside>
+
+  <!-- Contenu principal -->
+  <section class="content">
+
+    <!-- État vide -->
+    <div class="empty-state" *ngIf="!result">
+      <div class="empty-icon-wrap">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="18" stroke="#cbd5e1" stroke-width="2"/>
+          <path d="M16 24 Q20 14 24 24 Q28 34 32 24" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <p class="empty-title">Uploadez vos fichiers de test</p>
+      <span class="empty-sub">
+        Fichiers attendus : THD · Rub+Buzz · Frequency Response<br>
+        pour les haut-parleurs : Center · Left · Right · Woofer
+      </span>
+      <div class="empty-badges">
+        <span class="ebadge">THD</span>
+        <span class="ebadge">Rub+Buzz</span>
+        <span class="ebadge">Freq. Response</span>
+        <span class="ebadge">Center · Left · Right · Woofer</span>
+      </div>
+    </div>
+
+    <!-- Résultats -->
+    <div id="results-section" *ngIf="result">
+
+      <app-dashboard [stats]="result.stats" />
+
+      <!-- Tableau défectueux -->
+      <div class="table-card" *ngIf="failedProducts.length > 0">
+        <div class="table-header">
+          <h2 class="table-title">
+            <span class="warn-icon">⚠</span>
+            Produits défectueux
+            <span class="badge-count">{{ failedProducts.length }}</span>
+          </h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Machine</th>
+                <th>N° Série</th>
+                <th>Type anomalie</th>
+                <th>Speaker</th>
+                <th>Test</th>
+                <th>Freq. min</th>
+                <th>Freq. max</th>
+                <th>Excess</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of failedProducts">
+                <td class="machine-id">{{ row.machine }}</td>
+                <td class="serial">{{ row.serial }}</td>
+                  <td>
+                      <span
+                        class="anomaly-badge"
+                        [style.background]="anomalyColor(row.anomalyType) + '22'"
+                        [style.color]="anomalyColor(row.anomalyType)"
+                        [style.border-color]="anomalyColor(row.anomalyType) + '55'"
+                        [title]="getAnomalyDescription(row.anomalyType)"
+                      >
+                        {{ getAnomalyLabel(row.anomalyType) }}
+                      </span>
+                  </td>
+                <td>{{ row.speaker }}</td>
+                <td>{{ row.test }}</td>
+                <td class="freq">{{ row.freqMin | number:'1.0-0' }} Hz</td>
+                <td class="freq">{{ row.freqMax | number:'1.0-0' }} Hz</td>
+                <td class="excess" [class.high]="row.excess > 10">
+                  {{ row.excess | number:'1.2-2' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tous passés -->
+      <div class="all-passed" *ngIf="failedProducts.length === 0">
+        <div class="pass-icon">✓</div>
+        <p>Tous les produits ont passé les tests !</p>
+      </div>
+
+    </div>
+  </section>
+</main>

@@ -1,0 +1,161 @@
+<div class="stats-page">
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Chargement des statistiques...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-state" *ngIf="error && !loading">
+    <span>⚠</span>
+    <p>Impossible de charger les données. Vérifiez que l'API est démarrée.</p>
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon total">🧪</div>
+        <div class="kpi-value">{{ globalStats?.total_products || 0 }}</div>
+        <div class="kpi-label">Total produits testés</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon passed">✓</div>
+        <div class="kpi-value green">{{ globalStats?.total_passed || 0 }}</div>
+        <div class="kpi-label">Passed</div>
+        <div class="kpi-rate">{{ globalStats?.total_products ? 
+          ((globalStats.total_passed / globalStats.total_products)*100 | number:'1.0-1') : 0 }}%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon failed">✕</div>
+        <div class="kpi-value red">{{ globalStats?.total_failed || 0 }}</div>
+        <div class="kpi-label">Failed</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon risk">!</div>
+        <div class="kpi-value orange">{{ globalStats?.total_at_risk || 0 }}</div>
+        <div class="kpi-label">At Risk</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon multi">⚙</div>
+        <div class="kpi-value">{{ multiMachineProducts.length }}</div>
+        <div class="kpi-label">Produits multi-machines</div>
+      </div>
+    </div>
+
+    <!-- Row 1: Stats par machine + Stats par date -->
+    <div class="row-2">
+
+      <!-- Par machine -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Tests par machine</h3>
+          <span class="card-sub">Taux d'échec par ligne de production</span>
+        </div>
+        <div class="machine-list">
+          <div class="machine-row" *ngFor="let m of machineStats">
+            <div class="machine-name">Machine {{ m.machine_id }}</div>
+            <div class="machine-bar-wrap">
+              <div class="machine-bar">
+                <div class="bar-passed" [style.width]="barWidth(m.passed, m.total)"></div>
+                <div class="bar-risk" [style.width]="barWidth(m.at_risk, m.total)"></div>
+                <div class="bar-failed" [style.width]="barWidth(m.failed, m.total)"></div>
+              </div>
+            </div>
+            <div class="machine-meta">
+              <span class="tag-total">{{ m.total }}</span>
+              <span class="tag-failed" *ngIf="m.failed > 0">{{ m.failed }} ✕</span>
+              <span class="pass-rate" [class.good]="m.pass_rate >= 80">{{ m.pass_rate }}%</span>
+            </div>
+          </div>
+          <div class="empty-msg" *ngIf="machineStats.length === 0">Aucune donnée</div>
+        </div>
+      </div>
+
+      <!-- Par date -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Tests par jour</h3>
+          <span class="card-sub">30 derniers jours</span>
+        </div>
+        <div class="date-chart">
+          <div class="date-col" *ngFor="let d of dateStats">
+            <div class="date-bars">
+              <div class="date-bar passed" 
+                   [style.height]="barWidth(d.passed, maxDate())"
+                   [title]="d.passed + ' passed'"></div>
+              <div class="date-bar failed" 
+                   [style.height]="barWidth(d.failed, maxDate())"
+                   [title]="d.failed + ' failed'"></div>
+            </div>
+            <div class="date-label">{{ d.date | slice:5:10 }}</div>
+          </div>
+          <div class="empty-msg" *ngIf="dateStats.length === 0">Aucune donnée</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Anomalies + Produits multi-machines -->
+    <div class="row-2">
+
+      <!-- Top anomalies -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Top anomalies</h3>
+          <span class="card-sub">Par type détecté</span>
+        </div>
+        <div class="anomaly-list">
+          <div class="anomaly-row" *ngFor="let a of topAnomalyTypes; let i = index">
+            <span class="anomaly-rank">#{{ i+1 }}</span>
+            <span class="anomaly-type">{{ a.type }}</span>
+            <div class="anomaly-bar-wrap">
+              <div class="anomaly-bar" 
+                   [style.width]="barWidth(a.count, topAnomalyTypes[0].count)"
+                   [style.background]="i === 0 ? '#ef4444' : i === 1 ? '#f97316' : '#f59e0b'">
+              </div>
+            </div>
+            <span class="anomaly-count">{{ a.count }}</span>
+          </div>
+          <div class="empty-msg" *ngIf="topAnomalyTypes.length === 0">Aucune anomalie</div>
+        </div>
+      </div>
+
+      <!-- Produits multi-machines -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Produits testés sur plusieurs machines</h3>
+          <span class="card-sub">Aide à détecter un défaut de machine</span>
+        </div>
+        <div class="table-wrap" *ngIf="multiMachineProducts.length > 0">
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Machines</th>
+                <th>Tests</th>
+                <th>Failed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of multiMachineProducts">
+                <td class="produit-id">{{ p.produit_id }}</td>
+                <td><span class="machine-tags">{{ p.machines }}</span></td>
+                <td>{{ p.total_tests }}</td>
+                <td>
+                  <span class="failed-badge" *ngIf="p.total_failed > 0">{{ p.total_failed }} ✕</span>
+                  <span class="ok-badge" *ngIf="p.total_failed === 0">OK</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-msg centered" *ngIf="multiMachineProducts.length === 0">
+          Aucun produit testé sur plusieurs machines
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</div>
