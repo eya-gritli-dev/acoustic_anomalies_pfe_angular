@@ -1,0 +1,407 @@
+/* ══════════════════════════════════════════════════════════════
+   FEEDBACK PAGE — VERSION STYLE HOME
+   ══════════════════════════════════════════════════════════════ */
+
+.feedback-page {
+  padding: 26px 30px;
+  min-height: 100vh;
+  background: #0d0b26;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  color: #e2e8f0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STATS
+   ══════════════════════════════════════════════════════════════ */
+
+.fb-stats-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.fb-stat-card {
+  flex: 1;
+  min-width: 170px;
+  background: #12103a;
+  border-radius: 18px;
+  padding: 22px;
+  border: 1px solid rgba(99,102,241,0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fb-stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.fb-stat-card.pending::before {
+  background: linear-gradient(135deg,#f59e0b,#fbbf24);
+}
+
+.fb-stat-card.total::before {
+  background: linear-gradient(135deg,#3b82f6,#06b6d4);
+}
+
+.fb-stat-card.classes::before {
+  background: linear-gradient(135deg,#8b5cf6,#7c3aed);
+}
+
+.fb-stat-icon {
+  font-size: 1.5rem;          /* était 1.2rem */
+  opacity: 0.9;
+}
+
+.fb-stat-val {
+  font-size: 3rem;          /* était 2.2rem */
+  font-weight: 800;           /* était 700 — plus gras */
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.fb-stat-label {
+  color: rgba(203,213,225,0.75);  /* était 0.55 — plus visible */
+  font-size: 2rem;            /* était 0.82rem */
+  font-weight: 600;           /* ajout gras */
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.fb-stat-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.fb-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99,102,241,0.3);
+  box-shadow: 0 10px 30px rgba(99,102,241,0.18);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ACTIONS
+   ══════════════════════════════════════════════════════════════ */
+
+.actions-col {
+  min-width: 320px;
+  justify-content: center;
+}
+
+.action-block {
+  width: 100%;
+}
+
+.btn-import-json,
+.btn-retrain {
+  width: 100%;
+  justify-content: center;
+}
+
+.action-hint {
+  font-size: 15px;            /* était 11px */
+  color: rgba(148,163,184,0.6);  /* était 0.45 — plus visible */
+  margin-top: 4px;
+  font-weight: 500;           /* ajout */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BUTTONS
+   ══════════════════════════════════════════════════════════════ */
+
+.btn-import-json,
+.btn-retrain,
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 20px;         /* était 11px 18px */
+  font-size: 18px;            /* était 12px */
+  font-weight: 700;           /* était 600 */
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-form {
+  margin-left: 60px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(99,102,241,0.16);
+  color: #94a3b8;
+  border-radius: 10px;
+  padding: 12px 18px;         /* était 10px 16px */
+  font-size: 18px;            /* était 12px */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-form:hover {
+  background: rgba(99,102,241,0.1);
+  color: #e2e8f0;
+}
+
+.btn-import-json {
+  background: linear-gradient(135deg,#8b5cf6,#7c3aed);
+  color: white;
+}
+
+.btn-retrain {
+  background: linear-gradient(135deg,#6366f1,#4f46e5);
+  color: white;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg,#10b981,#059669);
+  color: white;
+}
+
+.btn-import-json:hover,
+.btn-retrain:hover,
+.btn-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(99,102,241,0.25);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CARDS
+   ══════════════════════════════════════════════════════════════ */
+
+.card,
+.top-errors-card,
+.confusion-matrix-card,
+.metric-chip {
+  background: #12103a;
+  border-radius: 18px;
+  border: 1px solid rgba(99,102,241,0.16);
+}
+
+.card {
+  padding: 24px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CARD HEADER
+   ══════════════════════════════════════════════════════════════ */
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.card-header h3 {
+  color: #e2e8f0;
+  font-size: 2rem;          /* était 1rem */
+  font-weight: 800;           /* était 700 */
+  letter-spacing: -0.2px;
+}
+
+.card-sub {
+  color: rgba(148,163,184,0.6);  /* était 0.45 */
+  font-size: 1.25rem;          /* était 0.78rem */
+  font-weight: 500;           /* ajout */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FORM
+   ══════════════════════════════════════════════════════════════ */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 22px;            /* était 12px */
+  font-weight: 800;           /* ajout gras */
+  color: rgba(203,213,225,0.85);  /* était 0.6 */
+}
+
+.form-input,
+.form-select {
+  background: #0b0a22;
+  border: 1px solid rgba(99,102,241,0.15);
+  border-radius: 10px;
+  padding: 13px 16px;         /* était 11px 14px */
+  color: #e2e8f0;
+  font-size: 20px;            /* était 13px */
+  font-weight: 500;           /* ajout */
+  transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: rgba(99,102,241,0.45);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}
+
+.form-input::placeholder {
+  color: rgba(148,163,184,0.45);
+  font-size: 18px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BADGES
+   ══════════════════════════════════════════════════════════════ */
+
+.badge-original,
+.label-original {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 13px;          /* était 4px 10px */
+  border-radius: 999px;
+  background: rgba(239,68,68,0.14);
+  color: #f87171;
+  font-size: 13px;            /* était 11px */
+  font-weight: 700;           /* était 600 */
+}
+
+.label-corrige {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 13px;          /* était 4px 10px */
+  border-radius: 999px;
+  background: rgba(16,185,129,0.14);
+  color: #34d399;
+  font-size: 16px;            /* était 11px */
+  font-weight: 800;           /* était 700 */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TABLES
+   ══════════════════════════════════════════════════════════════ */
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.fb-table,
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 18px;            /* était 12px */
+}
+
+.fb-table thead tr,
+.report-table thead tr {
+  background: rgba(99,102,241,0.05);
+}
+
+.fb-table th,
+.report-table th {
+  padding: 13px 16px;         /* était 12px 14px */
+  text-align: left;
+  font-size: 18px;            /* était 10px */
+  font-weight: 700;           /* était 600 */
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: rgba(148,163,184,0.6);  /* était 0.45 */
+  border-bottom: 1px solid rgba(99,102,241,0.12);
+}
+
+.fb-table td,
+.report-table td {
+  padding: 13px 16px;         /* était 12px 14px */
+  color: rgba(226,232,240,0.85); /* était 0.75 */
+  font-size: 18px;            /* ajout explicite */
+}
+
+.fb-table tbody tr,
+.report-table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.15s;
+}
+
+.fb-table tbody tr:hover,
+.report-table tbody tr:hover {
+  background: rgba(99,102,241,0.06);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ACTION BUTTONS TABLE
+   ══════════════════════════════════════════════════════════════ */
+
+.btn-action {
+  width: 32px;                /* était 30px */
+  height: 32px;               /* était 30px */
+  border-radius: 8px;
+  border: 1px solid rgba(99,102,241,0.18);
+  background: rgba(255,255,255,0.03);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.btn-action:hover {
+  background: rgba(99,102,241,0.15);
+  border-color: rgba(99,102,241,0.4);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   REPORT / METRICS
+   ══════════════════════════════════════════════════════════════ */
+
+.metrics-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.metric-chip {
+  padding: 20px 26px;         /* était 18px 22px */
+  min-width: 170px;           /* était 140px */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mc-label {
+  font-size: 15px;            /* était 10px */
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;           /* ajout */
+  color: rgba(148,163,184,0.6);  /* était 0.45 */
+}
+
+.mc-val {
+  font-size: 2.2rem;          /* était 1.8rem */
+  font-weight: 800;           /* était 700 */
+}
+.num-cell{
+  font-size: 25px;            /* était 12px */
+  font-weight: 600;           /* ajout */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .fb-stats-row {
+    flex-direction: column;
+  }
+}

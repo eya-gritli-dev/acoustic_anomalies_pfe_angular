@@ -32,24 +32,23 @@ export class DashboardComponent implements OnChanges {
   getAnomalyDescription = getAnomalyDescription;
 
   private readonly ANOMALY_COLORS: Record<string, string> = {
-    W_THD_Process_Jig:  '#ef4444',
-    W_THD_General:      '#f87171',
-    W_FR_Deficit:       '#f59e0b',
-    W_FR_Exces:         '#fb923c',
-    W_RB_Adhesif:       '#f97316',
-    W_RB_Bobine:        '#dc2626',
-    W_RB_LeadWire:      '#ea580c',
-    S_THD_Aimant:       '#10b981',
-    S_THD_Bobine:       '#34d399',
-    S_THD_General:      '#6ee7b7',
-    S_FR_Aimant_Fluide: '#8b5cf6',
-    S_FR_Resonance:     '#a78bfa',
-    S_FR_Anomalie:      '#c4b5fd',
-    S_RB_Adhesif:       '#f97316',
-    S_RB_LeadWire:      '#3b82f6',
-    S_RB_Bobine_BF:     '#2563eb',
-    S_RB_Anomalie:      '#93c5fd',
-    INCONNU:            '#94a3b8',
+    'GA1-a':   '#ef4444',
+    'GA1-b':   '#f87171',
+    'GA2-a':   '#f59e0b',
+    'GA2-b':   '#fbbf24',
+    'GA4':     '#fb923c',
+    'GF1-A':   '#f97316',
+    'GF2-AB':  '#dc2626',
+    'GF3':     '#10b981',
+    'GF5-O':   '#8b5cf6',
+    'GF5-W':   '#a78bfa',
+    'GF6-A/B': '#3b82f6',
+    'GT1':     '#34d399',
+    'GT2':     '#f59e0b',
+    'GT3':     '#6ee7b7',
+    'GT4':     '#2563eb',
+    'GT5-A':   '#93c5fd',
+    
   };
 
   readonly SPEAKER_COLORS: Record<string, string> = {

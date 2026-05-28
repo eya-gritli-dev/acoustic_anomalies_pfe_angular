@@ -8,59 +8,141 @@
 
   <!-- Error -->
   <div class="error-state" *ngIf="error && !loading">
-    <span>⚠</span>
+    <span class="err-icon">⚠</span>
     <p>Impossible de charger les données. Vérifiez que l'API est démarrée.</p>
   </div>
 
   <ng-container *ngIf="!loading && !error">
 
-    <!-- KPI Cards -->
+    <!-- ── Barre de recherche ─────────────────────────── -->
+    <div class="search-card">
+      <div class="search-header">
+        <span class="search-title">Recherche</span>
+        <div class="search-toggle">
+          <button class="toggle-btn" [class.active]="searchType === 'serie'"
+                  (click)="searchType = 'serie'; clearSearch()">N° Série</button>
+          <button class="toggle-btn" [class.active]="searchType === 'machine'"
+                  (click)="searchType = 'machine'; clearSearch()">N° Machine</button>
+        </div>
+      </div>
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <span class="search-icon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M10 10L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <input class="search-input"
+                 type="text"
+                 [(ngModel)]="searchQuery"
+                 (keyup.enter)="onSearch()"
+                 [placeholder]="searchType === 'serie' ? 'Ex: 012345678912345' : 'Ex: 08_BAC_ASSEMB_18_15'"
+          />
+          <button class="clear-btn" *ngIf="searchQuery" (click)="clearSearch()">✕</button>
+        </div>
+        <button class="search-btn" (click)="onSearch()">Rechercher</button>
+      </div>
+
+      <!-- Résultats recherche -->
+      <div class="search-results" *ngIf="hasSearched">
+        <div class="search-loading" *ngIf="searchLoading">
+          <div class="mini-spinner"></div> Recherche en cours...
+        </div>
+        <div class="search-error" *ngIf="searchError && !searchLoading">
+          Erreur lors de la recherche.
+        </div>
+        <div class="search-empty" *ngIf="!searchLoading && !searchError && searchResults.length === 0">
+          Aucun résultat trouvé.
+        </div>
+        <div class="results-table-wrap" *ngIf="!searchLoading && searchResults.length > 0">
+          <div class="results-count">{{ searchResults.length }} résultat(s)</div>
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>N° Série</th>
+                <th>Machine</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Anomalies</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of searchResults">
+                <td class="cell-serial">{{ r.produit_id }}</td>
+                <td class="cell-machine">{{ r.machine_id }}</td>
+                <td class="cell-date">{{ r.date | date:'dd/MM/yy HH:mm' }}</td>
+                <td>
+                  <span [class]="statusClass(r.statut)" class="status-badge">
+                    {{ r.statut }}
+                  </span>
+                </td>
+                <td class="cell-count">{{ r.nb_anomalies ?? '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── KPI Cards ──────────────────────────────────── -->
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-icon total">🧪</div>
+        <div class="kpi-icon-wrap total">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
         <div class="kpi-value">{{ globalStats?.total_products || 0 }}</div>
-        <div class="kpi-label">Total produits testés</div>
+        <div class="kpi-label">Total testés</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon passed">✓</div>
+        <div class="kpi-icon-wrap passed">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
         <div class="kpi-value green">{{ globalStats?.total_passed || 0 }}</div>
         <div class="kpi-label">Passed</div>
-        <div class="kpi-rate">{{ globalStats?.total_products ? 
-          ((globalStats.total_passed / globalStats.total_products)*100 | number:'1.0-1') : 0 }}%</div>
+        <div class="kpi-rate">
+          {{ globalStats?.total_products ?
+            ((globalStats.total_passed / globalStats.total_products)*100 | number:'1.0-1') : 0 }}%
+        </div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon failed">✕</div>
+        <div class="kpi-icon-wrap failed">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
         <div class="kpi-value red">{{ globalStats?.total_failed || 0 }}</div>
         <div class="kpi-label">Failed</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon risk">!</div>
+        <div class="kpi-icon-wrap risk">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
         <div class="kpi-value orange">{{ globalStats?.total_at_risk || 0 }}</div>
         <div class="kpi-label">At Risk</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon multi">⚙</div>
+        <div class="kpi-icon-wrap multi">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="16" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M11 12h2" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
         <div class="kpi-value">{{ multiMachineProducts.length }}</div>
-        <div class="kpi-label">Produits multi-machines</div>
+        <div class="kpi-label">Multi-machines</div>
       </div>
     </div>
 
-    <!-- Row 1: Stats par machine + Stats par date -->
+    <!-- ── Row 1: Par machine + Par date ─────────────── -->
     <div class="row-2">
 
-      <!-- Par machine -->
       <div class="card">
         <div class="card-header">
           <h3>Tests par machine</h3>
-          <span class="card-sub">Taux d'échec par ligne de production</span>
+          <span class="card-sub">Taux d'échec par ligne</span>
         </div>
         <div class="machine-list">
           <div class="machine-row" *ngFor="let m of machineStats">
-            <div class="machine-name">Machine {{ m.machine_id }}</div>
+            <div class="machine-name">{{ m.machine_id }}</div>
             <div class="machine-bar-wrap">
               <div class="machine-bar">
                 <div class="bar-passed" [style.width]="barWidth(m.passed, m.total)"></div>
-                <div class="bar-risk" [style.width]="barWidth(m.at_risk, m.total)"></div>
+                <div class="bar-risk"   [style.width]="barWidth(m.at_risk, m.total)"></div>
                 <div class="bar-failed" [style.width]="barWidth(m.failed, m.total)"></div>
               </div>
             </div>
@@ -74,19 +156,18 @@
         </div>
       </div>
 
-      <!-- Par date -->
       <div class="card">
         <div class="card-header">
           <h3>Tests par jour</h3>
-          <span class="card-sub">30 derniers jours</span>
+          <span class="card-sub">14 derniers jours</span>
         </div>
         <div class="date-chart">
           <div class="date-col" *ngFor="let d of dateStats">
             <div class="date-bars">
-              <div class="date-bar passed" 
+              <div class="date-bar passed"
                    [style.height]="barWidth(d.passed, maxDate())"
                    [title]="d.passed + ' passed'"></div>
-              <div class="date-bar failed" 
+              <div class="date-bar failed"
                    [style.height]="barWidth(d.failed, maxDate())"
                    [title]="d.failed + ' failed'"></div>
             </div>
@@ -97,10 +178,29 @@
       </div>
     </div>
 
-    <!-- Row 2: Anomalies + Produits multi-machines -->
+    <!-- ── Row 2: Anomalies par mois (full width) ────── -->
+    <div class="card card-full">
+      <div class="card-header">
+        <h3>Anomalies par mois</h3>
+        <span class="card-sub">Évolution mensuelle du nombre d'anomalies détectées</span>
+      </div>
+      <div class="monthly-chart" *ngIf="monthlyAnomalies.length > 0">
+        <div class="monthly-col" *ngFor="let m of monthlyAnomalies">
+          <div class="monthly-bar-wrap">
+            <span class="monthly-count" *ngIf="m.count > 0">{{ m.count }}</span>
+            <div class="monthly-bar"
+                 [style.height]="barWidth(m.count, maxMonthlyCount)"
+                 [class.high]="m.count === maxMonthlyCount"></div>
+          </div>
+          <div class="monthly-label">{{ m.mois }}</div>
+        </div>
+      </div>
+      <div class="empty-msg centered" *ngIf="monthlyAnomalies.length === 0">Aucune donnée mensuelle</div>
+    </div>
+
+    <!-- ── Row 3: Top anomalies + Multi-machines ─────── -->
     <div class="row-2">
 
-      <!-- Top anomalies -->
       <div class="card">
         <div class="card-header">
           <h3>Top anomalies</h3>
@@ -109,11 +209,11 @@
         <div class="anomaly-list">
           <div class="anomaly-row" *ngFor="let a of topAnomalyTypes; let i = index">
             <span class="anomaly-rank">#{{ i+1 }}</span>
-            <span class="anomaly-type">{{ a.type }}</span>
+            <span class="anomaly-type" [title]="a.type">{{ a.type }}</span>
             <div class="anomaly-bar-wrap">
-              <div class="anomaly-bar" 
+              <div class="anomaly-bar"
                    [style.width]="barWidth(a.count, topAnomalyTypes[0].count)"
-                   [style.background]="i === 0 ? '#ef4444' : i === 1 ? '#f97316' : '#f59e0b'">
+                   [class.rank1]="i === 0" [class.rank2]="i === 1" [class.rank3]="i >= 2">
               </div>
             </div>
             <span class="anomaly-count">{{ a.count }}</span>
@@ -122,11 +222,10 @@
         </div>
       </div>
 
-      <!-- Produits multi-machines -->
       <div class="card">
         <div class="card-header">
-          <h3>Produits testés sur plusieurs machines</h3>
-          <span class="card-sub">Aide à détecter un défaut de machine</span>
+          <h3>Produits multi-machines</h3>
+          <span class="card-sub">Détection de défaut de machine</span>
         </div>
         <div class="table-wrap" *ngIf="multiMachineProducts.length > 0">
           <table class="mini-table">
@@ -145,7 +244,7 @@
                 <td>{{ p.total_tests }}</td>
                 <td>
                   <span class="failed-badge" *ngIf="p.total_failed > 0">{{ p.total_failed }} ✕</span>
-                  <span class="ok-badge" *ngIf="p.total_failed === 0">OK</span>
+                  <span class="ok-badge"     *ngIf="p.total_failed === 0">OK</span>
                 </td>
               </tr>
             </tbody>

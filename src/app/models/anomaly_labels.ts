@@ -7,100 +7,105 @@ export interface AnomalyMeta {
 
 export const ANOMALY_META: Record<string, AnomalyMeta> = {
 
-  // ── WOOFER ────────────────────────────────────────────────────────────────
-  W_THD_Process_Jig: {
-    label: 'THD — Outillage / Collage',
+  'GA1-a': {
+    label: 'Mousse HF center/mid',
     description:
-      'THD élevé (jusqu\'à 3,4 %) causé par des gabarits (jigs) usés, ' +
-      'mal calibrés ou un processus de collage non automatisé sans vérification formelle.',
+      'Mousse haute fréquence mal positionnée ou absente sur le speaker center/mid ' +
+      '→ anomalie de réponse en fréquence en haute fréquence (> 2 kHz).',
   },
-  W_THD_General: {
-    label: 'THD — Défaut mécanique',
-    description: 'Distorsion THD due à un défaut mécanique ou process non identifié précisément.',
-  },
-  W_FR_Deficit: {
-    label: 'Réponse en fréquence faible',
+  'GA1-b': {
+    label: 'Mousse acrylique woofer',
     description:
-      'FR insuffisante : aimant de taille insuffisante (force BL trop faible) ' +
-      'ou fluide magnétique de viscosité inadaptée.',
+      'Mousse acrylique du woofer absente ou mal collée ' +
+      '→ résonance mécanique en basse fréquence (< 500 Hz).',
   },
-  W_FR_Exces: {
-    label: 'Réponse en fréquence excessive',
-    description: 'FR excessive causée par une résonance mécanique ou un problème de montage.',
-  },
-  W_RB_Adhesif: {
-    label: 'Rub & Buzz — Adhésif manquant',
+  'GA2-a': {
+    label: 'FNC basse fréquence',
     description:
-      'Absence ou insuffisance d\'adhésif sur le fil conducteur (lead wire) : ' +
-      'le fil vibre librement dans l\'entrefer → résonance 4–5 kHz.',
+      'Défaut de fond de caisson (FNC) générant une anomalie acoustique ' +
+      'localisée en basse fréquence (< 500 Hz).',
   },
-  W_RB_Bobine: {
-    label: 'Rub & Buzz — Désalignement bobine',
+  'GA2-b': {
+    label: 'Tunneur mal soudé',
     description:
-      'Désalignement de la bobine vocale (voice coil), souvent dû à un jig usé ' +
-      'ou mal remplacé → frottement mécanique en basses fréquences (< 500 Hz).',
+      'Soudure défectueuse sur le tunneur → perturbation électromécanique ' +
+      'se manifestant par un pic ou décalage sur THD ou Rub & Buzz.',
   },
-  W_RB_LeadWire: {
-    label: 'Rub & Buzz — Position fil conducteur',
+  'GA4': {
+    label: 'Bavure / particules',
     description:
-      'Distance excessive entre le point de sortie du fil et l\'encoche du support : ' +
-      'le fil touche la bobine → contact mécanique.',
+      'Présence de particules ou bavures dans l\'entrefer ' +
+      '→ frottement mécanique, souvent détecté en Rub & Buzz basse fréquence.',
+  },
+  'GF1-A': {
+    label: 'Soudure froide',
+    description:
+      'Mauvaise soudure (cold solder) sur les connexions électriques du speaker ' +
+      '→ chute profonde de la réponse en fréquence (val_fr élevé).',
+  },
+  'GF2-AB': {
+    label: 'Désalignement mécanique',
+    description:
+      'Désalignement de la bobine vocale ou du cache-poussière ' +
+      '→ frottement mécanique détecté en THD ou Rub & Buzz, ' +
+      'souvent en basse ou moyenne fréquence.',
+  },
+  'GF3': {
+    label: 'Lead wire résonance',
+    description:
+      'Fil conducteur (lead wire) mal fixé ou sans adhésif ' +
+      '→ résonance localisée entre 4 et 5 kHz sur le test Rub & Buzz.',
+  },
+  'GF5-O': {
+    label: 'Cause physique à confirmer',
+    description:
+      'Anomalie détectée par le modèle ML mais cause physique non confirmée ' +
+      '→ nécessite inspection manuelle du speaker.',
+  },
+  'GF5-W': {
+    label: 'Défaut bobine / aimant BF',
+    description:
+      'Défaut de la bobine vocale ou de l\'aimant générant une distorsion THD ' +
+      'en basse fréquence (< 500 Hz) sur le woofer.',
+  },
+  'GF6-A/B': {
+    label: 'Coat PCBA',
+    description:
+      'Vernis de protection (coat) sur la carte électronique (PCBA) mal appliqué ' +
+      '→ perturbation électrique affectant le signal acoustique.',
+  },
+  'GT1': {
+    label: 'Fuite vérin caisson',
+    description:
+      'Fuite d\'air au niveau du vérin du caisson de test ' +
+      '→ anomalie de type test (bruit ambiant), non liée au speaker lui-même.',
+  },
+  'GT2': {
+    label: 'Vis plateau banc de test',
+    description:
+      'Vis du plateau du banc de test desserrée ou absente ' +
+      '→ vibration parasite affectant tous les speakers du produit (flag_multi_spk).',
+  },
+  'GT3': {
+    label: 'Cable coax micro',
+    description:
+      'Câble coaxial du microphone de test défectueux ou mal connecté ' +
+      '→ signal bruité affectant la mesure acoustique.',
+  },
+  'GT4': {
+    label: 'Calibration offset',
+    description:
+      'Décalage de calibration du banc de test (offset global) ' +
+      '→ tous les speakers du produit présentent un décalage uniforme (flag_multi_spk).',
+  },
+  'GT5-A': {
+    label: 'Capteur défaillant',
+    description:
+      'Capteur acoustique (microphone) du banc de test défaillant ' +
+      '→ valeurs aberrantes ou absence de signal sur un ou plusieurs speakers.',
   },
 
-  // ── SATELLITE (MIDRANGE) ──────────────────────────────────────────────────
-  S_THD_Aimant: {
-    label: 'THD — Aimant insuffisant',
-    description:
-      'Champ magnétique (force BL) trop faible dû à un aimant sous-dimensionné → ' +
-      'distorsion THD à basse fréquence (< 1 kHz). Solution : aimant agrandi.',
-  },
-  S_THD_Bobine: {
-    label: 'THD — Désalignement bobine',
-    description:
-      'Désalignement du cache-poussière (dust cap) avec hauteur NG moyenne de 0,317 mm ' +
-      '(vs < 0,06 mm pour les pièces conformes) → distorsion en médium/haute fréquence.',
-  },
-  S_THD_General: {
-    label: 'THD — Distorsion générale',
-    description: 'Distorsion THD sans cause racine identifiée précisément.',
-  },
-  S_FR_Aimant_Fluide: {
-    label: 'FR faible — Aimant / Fluide magnétique',
-    description:
-      'Réponse en fréquence insuffisante sous 1 kHz : aimant insuffisant ' +
-      'ou fluide magnétique trop fluide (nécessite version haute viscosité).',
-  },
-  S_FR_Resonance: {
-    label: 'FR excessive — Résonance mécanique',
-    description: 'Réponse en fréquence excessive causée par une résonance mécanique.',
-  },
-  S_FR_Anomalie: {
-    label: 'FR — Anomalie non classifiée',
-    description: 'Anomalie de réponse en fréquence sans classification précise.',
-  },
-  S_RB_Adhesif: {
-    label: 'Rub & Buzz — Adhésif manquant (4–5 kHz)',
-    description:
-      'Absence d\'adhésif sur le fil conducteur → vibration libre dans l\'entrefer ' +
-      '→ résonance localisée entre 4 et 5 kHz.',
-  },
-  S_RB_Bobine_BF: {
-    label: 'Rub & Buzz — Désalignement bobine BF',
-    description:
-      'Désalignement de la bobine vocale → frottement mécanique en basse fréquence.',
-  },
-  S_RB_LeadWire: {
-    label: 'Rub & Buzz — Fil conducteur sur bobine',
-    description:
-      'Le fil conducteur (lead wire) touche la bobine en raison d\'un mauvais ' +
-      'positionnement → vibration mécanique en médium fréquence.',
-  },
-  S_RB_Anomalie: {
-    label: 'Rub & Buzz — Anomalie non classifiée',
-    description: 'Rub & Buzz sans cause racine identifiée précisément.',
-  },
-
-  INCONNU: {
+  'INCONNU': {
     label: 'Défaut non classifié',
     description: 'Anomalie détectée mais non classifiée par le système.',
   },

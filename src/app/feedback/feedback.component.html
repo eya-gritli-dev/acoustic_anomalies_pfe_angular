@@ -1,0 +1,334 @@
+<div class="content">
+  <div class="feedback-page">
+  <!-- ══════════════════════════════════════════════════════════════════════
+       STATS + ACTIONS PRINCIPALES
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="fb-stats-row" *ngIf="retrainStats">
+
+    <!-- Cartes stats -->
+    <div class="fb-stat-card pending">
+      <div class="fb-stat-icon">⏳</div>
+      <div class="fb-stat-val">{{ retrainStats.pending }}</div>
+      <div class="fb-stat-label">En attente</div>
+    </div>
+    <div class="fb-stat-card total">
+      <div class="fb-stat-icon">📋</div>
+      <div class="fb-stat-val">{{ retrainStats.total_feedbacks }}</div>
+      <div class="fb-stat-label">Total feedbacks</div>
+    </div>
+    <div class="fb-stat-card classes">
+      <div class="fb-stat-icon">🏷</div>
+      <div class="fb-stat-val">{{ retrainStats.distinct_classes }}</div>
+      <div class="fb-stat-label">Types distincts</div>
+    </div>
+
+    <!-- Boutons actions -->
+    <div class="actions-col">
+
+      <!-- ── Import JSON auto ──────────────────────────────────────────── -->
+      <div class="action-block">
+        <button class="btn-import-json" (click)="previewJsonImport()"
+                [disabled]="importingJson" title="Importer les divergences JSON → BD comme feedbacks">
+          <span class="mini-spinner" *ngIf="importingJson"></span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" *ngIf="!importingJson">
+            <path d="M12 3v12m0 0l-4-4m4 4l4-4M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"
+                  stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          {{ importingJson ? 'Analyse...' : 'Importer depuis JSON' }}
+        </button>
+        <span class="action-hint">Import automatique des divergences JSON vs ML</span>
+      </div>
+
+      <!-- ── Confirmation dry-run ──────────────────────────────────────── -->
+      <div class="import-confirm-box" *ngIf="showImportConfirm && importPreview">
+        <div class="confirm-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          Aperçu avant insertion
+        </div>
+        <div class="confirm-stats">
+          <span class="cs-diverg">{{ importPreview.divergences }} divergences détectées</span>
+          <span class="cs-concord">{{ importPreview.concordances }} concordances</span>
+        </div>
+        <p class="confirm-msg">
+          Ces {{ importPreview.divergences }} corrections seront ajoutées à l'historique
+          avec le label JSON comme label correct. Confirmer ?
+        </p>
+        <div class="confirm-actions">
+          <button class="btn-confirm-yes" (click)="confirmJsonImport()" [disabled]="importingJson">
+            <span class="mini-spinner" *ngIf="importingJson"></span>
+            {{ importingJson ? 'Insertion...' : '✓ Confirmer l\'import' }}
+          </button>
+          <button class="btn-confirm-no" (click)="cancelJsonImport()">Annuler</button>
+        </div>
+      </div>
+
+      <div class="import-msg ok"  *ngIf="importMsg && importOk">{{ importMsg }}</div>
+      <div class="import-msg err" *ngIf="importMsg && !importOk">{{ importMsg }}</div>
+
+      <!-- ── Réentraîner ───────────────────────────────────────────────── -->
+      <div class="action-block">
+        <button class="btn-retrain" (click)="triggerRetrain()" [disabled]="retraining">
+          <span class="mini-spinner" *ngIf="retraining"></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" *ngIf="!retraining">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="white" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          {{ retraining ? 'Entraînement...' : 'Réentraîner le modèle' }}
+        </button>
+        <span class="action-hint">Utilise les feedbacks en attente + dataset original</span>
+      </div>
+
+      <div class="retrain-msg ok"  *ngIf="retrainMsg && retrainOk">{{ retrainMsg }}</div>
+      <div class="retrain-msg err" *ngIf="retrainMsg && !retrainOk">{{ retrainMsg }}</div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       RÉSULTATS RÉENTRAÎNEMENT : MÉTRIQUES + MATRICE
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="retrain-results" *ngIf="retrainResult?.success">
+
+    <!-- Métriques globales -->
+    <div class="metrics-row">
+      <div class="metric-chip">
+        <span class="mc-label">Accuracy</span>
+        <span class="mc-val" [style.color]="f1Color(retrainResult.accuracy)">
+          {{ (retrainResult.accuracy * 100).toFixed(1) }}%
+        </span>
+      </div>
+      <div class="metric-chip" *ngIf="retrainResult.f1_macro">
+        <span class="mc-label">F1-macro CV</span>
+        <span class="mc-val" [style.color]="f1Color(retrainResult.f1_macro)">
+          {{ (retrainResult.f1_macro * 100).toFixed(1) }}%
+        </span>
+      </div>
+      <div class="metric-chip">
+        <span class="mc-label">Exemples</span>
+        <span class="mc-val">{{ retrainResult.n_samples }}</span>
+      </div>
+      <div class="metric-chip">
+        <span class="mc-label">Classes</span>
+        <span class="mc-val">{{ retrainResult.n_classes }}</span>
+      </div>
+      <div class="metric-chip">
+        <span class="mc-label">Feedbacks</span>
+        <span class="mc-val accent">{{ retrainResult.n_feedbacks }}</span>
+      </div>
+    </div>
+
+    <!-- Top erreurs -->
+    <div class="top-errors-card" *ngIf="retrainResult.top_errors?.length">
+      <h4>⚠ Top confusions du modèle</h4>
+      <div class="top-errors-list">
+        <div class="te-item" *ngFor="let e of retrainResult.top_errors">
+          <span class="te-real">{{ e.real }}</span>
+          <span class="te-arrow">→ prédit</span>
+          <span class="te-pred">{{ e.pred }}</span>
+          <span class="te-count">× {{ e.count }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rapport de classification (toggle) -->
+    <div class="report-section">
+      <button class="btn-toggle-report" (click)="showReport = !showReport">
+        {{ showReport ? '▲ Masquer' : '▼ Voir' }} le rapport par classe
+      </button>
+
+      <div class="report-table-wrap" *ngIf="showReport && reportRows.length">
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Classe</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1-score</th>
+              <th>Support</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of reportRows">
+              <td class="rc-label">{{ r.label }}</td>
+              <td [style.color]="f1Color(r.precision)">{{ (r.precision * 100).toFixed(1) }}%</td>
+              <td [style.color]="f1Color(r.recall)">{{ (r.recall * 100).toFixed(1) }}%</td>
+              <td [style.color]="f1Color(r.f1)"><strong>{{ (r.f1 * 100).toFixed(1) }}%</strong></td>
+              <td class="rc-support">{{ r.support }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Matrice de confusion -->
+    <div class="confusion-matrix-card" *ngIf="confusionMatrixUrl">
+      <h4>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="7" height="7" stroke="#6366f1" stroke-width="1.8" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" stroke="#6366f1" stroke-width="1.8" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" stroke="#6366f1" stroke-width="1.8" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" stroke="#6366f1" stroke-width="1.8" rx="1"/>
+        </svg>
+        Matrice de confusion
+      </h4>
+      <p class="cm-hint">Chaque cellule = nombre d'exemples d'entraînement. Diagonale = bien classés.</p>
+      <img [src]="confusionMatrixUrl"
+           alt="Matrice de confusion"
+           class="cm-image"
+           (error)="confusionMatrixUrl = null"/>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       BANDEAU PRÉ-REMPLI
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="prefill-banner" *ngIf="prefilled">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    Données pré-remplies depuis <strong>Prédire</strong>.
+    Saisissez uniquement le label correct puis enregistrez.
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       FORMULAIRE MANUEL
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="card form-card" id="feedback-form">
+    <div class="card-header">
+      <div class="card-header-left">
+        <h3>{{ formTitle }}</h3>
+        <span class="editing-badge" *ngIf="editingId !== null">Édition #{{ editingId }}</span>
+      </div>
+      <button class="btn-cancel-edit" *ngIf="editingId !== null || prefilled" (click)="cancelEdit()">
+        ✕ Annuler
+      </button>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Speaker</label>
+        <input [(ngModel)]="form.speaker" placeholder="Ex: Center, Woofer..."
+               class="form-input" [class.prefilled-field]="prefilled"/>
+      </div>
+      <div class="form-group">
+        <label>Type test</label>
+        <input [(ngModel)]="form.type_test" placeholder="Ex: THD, RubBuzz..."
+               class="form-input" [class.prefilled-field]="prefilled"/>
+      </div>
+      <div class="form-group">
+        <label>Fréq. min (Hz)</label>
+        <input [(ngModel)]="form.freq_min" type="number"
+               class="form-input" [class.prefilled-field]="prefilled"/>
+      </div>
+      <div class="form-group">
+        <label>Fréq. max (Hz)</label>
+        <input [(ngModel)]="form.freq_max" type="number"
+               class="form-input" [class.prefilled-field]="prefilled"/>
+      </div>
+      <div class="form-group">
+        <label>Excess</label>
+        <input [(ngModel)]="form.excess" type="number" step="0.01"
+               class="form-input" [class.prefilled-field]="prefilled"/>
+      </div>
+      <div class="form-group">
+        <label>Expert</label>
+        <input [(ngModel)]="form.expert" placeholder="Votre nom" class="form-input"/>
+      </div>
+
+      <div class="form-group">
+        <label>Label original (prédit par le modèle)</label>
+        <div class="label-original-display">
+          <span class="badge-original">{{ form.label_original }}</span>
+        </div>
+      </div>
+
+      <div class="form-group highlight">
+        <label>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+            <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+          Label correct (ce que c'est vraiment)
+        </label>
+        <select [(ngModel)]="form.label_corrige" class="form-select accent">
+          <option value="">-- Choisir le bon label --</option>
+          <option *ngFor="let t of knownTypes" [value]="t">{{ t }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-submit" (click)="submitFeedback()" [disabled]="submitting">
+        <span class="mini-spinner white" *ngIf="submitting"></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" *ngIf="!submitting">
+          <path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        {{ submitting ? 'Envoi...' : submitLabel }}
+      </button>
+      <button class="btn-reset-form" (click)="cancelEdit()">Réinitialiser</button>
+    </div>
+
+    <div class="submit-msg ok"  *ngIf="submitMsg && submitOk">{{ submitMsg }}</div>
+    <div class="submit-msg err" *ngIf="submitMsg && !submitOk">{{ submitMsg }}</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       HISTORIQUE
+  ══════════════════════════════════════════════════════════════════════ -->
+  <div class="card history-card">
+    <div class="card-header">
+      <h3>Historique des corrections</h3>
+      <span class="card-sub">{{ pendingFeedbacks.length }} entrée(s)</span>
+    </div>
+
+    <div class="loading-list" *ngIf="loadingList">
+      <span class="mini-spinner dark"></span> Chargement...
+    </div>
+
+    <div class="empty-msg centered" *ngIf="!loadingList && pendingFeedbacks.length === 0">
+      Aucun feedback soumis pour l'instant.
+    </div>
+
+    <div class="table-wrap" *ngIf="!loadingList && pendingFeedbacks.length > 0">
+      <table class="fb-table">
+        <thead>
+          <tr>
+            <th>Speaker</th><th>Test</th><th>Freq min</th><th>Freq max</th>
+            <th>Excess</th><th>Prédit</th><th>→ Corrigé</th>
+            <th>Expert</th><th>Date</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let f of pendingFeedbacks" [class.editing-row]="editingId === f.id">
+            <td>{{ f.speaker }}</td>
+            <td>{{ f.type_test }}</td>
+            <td class="num-cell">{{ f.freq_min | number:'1.0-0' }} Hz</td>
+            <td class="num-cell">{{ f.freq_max | number:'1.0-0' }} Hz</td>
+            <td class="num-cell">{{ f.excess | number:'1.2-2' }}</td>
+            <td><span class="label-original">{{ f.label_original }}</span></td>
+            <td><span class="label-corrige">{{ f.label_corrige }}</span></td>
+            <td class="expert-cell">{{ f.expert }}</td>
+            <td class="date-cell">{{ f['date'] | slice:0:10 }}</td>
+            <td class="actions-cell">
+              <ng-container *ngIf="deleteConfirmId === f.id; else normalActions">
+                <span class="delete-confirm-text">Confirmer ?</span>
+                <button class="btn-action danger" (click)="confirmDelete(f.id!)">Oui</button>
+                <button class="btn-action ghost"  (click)="cancelDelete()">Non</button>
+              </ng-container>
+              <ng-template #normalActions>
+                <button class="btn-action edit"   (click)="startEdit(f)"      title="Modifier">✏</button>
+                <button class="btn-action delete" (click)="askDelete(f.id!)"  title="Supprimer">🗑</button>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  </div>
+</div>

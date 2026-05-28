@@ -8,15 +8,24 @@ import { PredictionResult, DashboardStats } from '../models/prediction.model';
 @Injectable({ providedIn: 'root' })
 export class PredictionService {
   private readonly API = 'http://localhost:8000';
+    private _lastResult: PredictionResult | null = null;
+
 
   constructor(private http: HttpClient) {}
 
+  get lastResult(): PredictionResult | null {
+    return this._lastResult;
+  }
+  setResult(r: PredictionResult | null): void {
+    this._lastResult = r;
+  }
   /** GET /health — vérifie que l'API et les modèles sont prêts */
   checkHealth(): Observable<{ status: string; models_loaded: boolean }> {
     return this.http
       .get<{ status: string; models_loaded: boolean }>(`${this.API}/health`)
       .pipe(catchError(this._handleError));
   }
+
 
   /**
    * POST /predict — envoie les fichiers .txt et retourne le résultat complet.

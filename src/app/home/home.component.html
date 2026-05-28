@@ -1,20 +1,6 @@
 <!-- ── Header ─────────────────────────────────────────────────────────── -->
 <header class="app-header">
-  <div class="header-left">
-    <div class="logo-block">
-  <div class="logo">
-    <img 
-  src="https://logos-world.net/wp-content/uploads/2023/02/Sagemcom-Logo.png" 
-  alt="Logo Sagemcom"
-  class="logo-img"
-/>
-  </div>      <span class="logo-fallback" style="display:none">SAGEMCOM</span>
-    </div>
-    <div class="divider"></div>
-    <div class="title-block">
-      <h1 class="app-title">Détection des anomalies acoustiques</h1>
-    </div>
-  </div>
+  <div class="header-left"></div>
   <div class="header-right">
     <div class="api-badge"
          [class.online]="apiOnline"
@@ -46,7 +32,8 @@
       <div class="empty-icon-wrap">
         <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="24" cy="24" r="18" stroke="#cbd5e1" stroke-width="2"/>
-          <path d="M16 24 Q20 14 24 24 Q28 34 32 24" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M16 24 Q20 14 24 24 Q28 34 32 24" stroke="#94a3b8" stroke-width="2"
+                stroke-linecap="round" fill="none"/>
         </svg>
       </div>
       <p class="empty-title">Uploadez vos fichiers de test</p>
@@ -75,43 +62,114 @@
             Produits défectueux
             <span class="badge-count">{{ failedProducts.length }}</span>
           </h2>
+          <span class="table-hint">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            Cliquez sur ✏ pour corriger un label
+          </span>
         </div>
+
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Machine</th>
                 <th>N° Série</th>
-                <th>Type anomalie</th>
-                <th>Speaker</th>
-                <th>Test</th>
-                <th>Freq. min</th>
-                <th>Freq. max</th>
-                <th>Excess</th>
+                <th>Haut-parleur</th>   <!-- ← ajouter -->
+                  <th>Type test</th>    
+                <th>Cause détectée</th>
+                <th>Confiance</th>
+                <th>Statut</th>
+                <th>Top 3 causes</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let row of failedProducts">
+
+                <!-- Machine -->
                 <td class="machine-id">{{ row.machine }}</td>
+
+                <!-- N° Série -->
                 <td class="serial">{{ row.serial }}</td>
+<!-- Haut-parleur -->          <!-- ← ajouter -->
+                  <td class="speaker">{{ row.speaker ?? '—' }}</td>
+
+                  <!-- Type test -->              <!-- ← ajouter -->
                   <td>
-                      <span
-                        class="anomaly-badge"
-                        [style.background]="anomalyColor(row.anomalyType) + '22'"
-                        [style.color]="anomalyColor(row.anomalyType)"
-                        [style.border-color]="anomalyColor(row.anomalyType) + '55'"
-                        [title]="getAnomalyDescription(row.anomalyType)"
-                      >
-                        {{ getAnomalyLabel(row.anomalyType) }}
-                      </span>
+                    <span class="test-badge"
+                      [class.test-thd]="row.typeTest === 'THD'"
+                      [class.test-rb]="row.typeTest === 'RubBuzz'"
+                      [class.test-fr]="row.typeTest === 'Frequency_Response'">
+                      {{ row.typeTest ?? '—' }}
+                    </span>
                   </td>
-                <td>{{ row.speaker }}</td>
-                <td>{{ row.test }}</td>
-                <td class="freq">{{ row.freqMin | number:'1.0-0' }} Hz</td>
-                <td class="freq">{{ row.freqMax | number:'1.0-0' }} Hz</td>
-                <td class="excess" [class.high]="row.excess > 10">
-                  {{ row.excess | number:'1.2-2' }}
+
+                <!-- Cause détectée (libellé complet coloré) -->
+                <td>
+                  <span class="anomaly-badge"
+                    [style.background]="anomalyColor(row.causeCode) + '22'"
+                    [style.color]="anomalyColor(row.causeCode)"
+                    [style.border-color]="anomalyColor(row.causeCode) + '55'"
+                    [title]="row.causeFull">
+                    {{ row.causeLabel }}
+                  </span>
                 </td>
+
+              
+
+                <!-- Confiance -->
+                <td class="confidence"
+                    [class.high]="row.confidence >= 0.85"
+                    [class.mid]="row.confidence >= 0.60 && row.confidence < 0.85"
+                    [class.low]="row.confidence < 0.60">
+                  {{ formatConfidence(row.confidence) }}
+                </td>
+
+                <!-- Sévérité -->
+                <td>
+                  <span class="severity-badge"
+                    [class.failed]="row.severity === 'FAILED'"
+                    [class.at-risk]="row.severity === 'AT_RISK'"
+                    [class.passed]="row.severity === 'PASSED'">
+                    {{ row.severity }}
+                  </span>
+                </td>
+
+                <!-- Top 3 causes -->
+                <td class="top3-cell">
+                  <div class="top3-list" *ngIf="row.top3?.length">
+                    <div class="top3-item" *ngFor="let t of row.top3">
+                      <span class="top3-code">{{ t.label }}</span>
+                      <span class="top3-bar-wrap">
+                        <span class="top3-bar"
+                              [style.width]="(t.prob * 100) + '%'"
+                              [style.background]="anomalyColor(t.code)">
+                        </span>
+                      </span>
+                      <span class="top3-prob">{{ (t.prob * 100).toFixed(0) }}%</span>
+                    </div>
+                  </div>
+                  <span *ngIf="!row.top3?.length" class="no-data">—</span>
+                </td>
+
+                <!-- Action -->
+                <td class="action-cell">
+                  <button class="btn-edit" (click)="navigateToFeedback(row)" title="Corriger ce label">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Corriger
+                  </button>
+                </td>
+
               </tr>
             </tbody>
           </table>
